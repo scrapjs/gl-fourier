@@ -33,8 +33,10 @@ module.exports = function (N, data) {
 		const float pi = ${Math.PI};
 
 		// take frequency and quality params, return real/imagine values
-		vec2 formant (float f, float q) {
-
+		vec2 formant (float f, float q, float a) {
+			return a * vec2(
+				pi2 * ratio
+			);
 		}
 
 		void main () {
@@ -47,7 +49,7 @@ module.exports = function (N, data) {
 			for (float i = 0.; i < N; i++) {
 				ratio = i/N;
 				x = texture2D(waveform, vec2(ratio, 0)).w;
-				energy += formant( pi2 * ratio * frequency) * x;
+				energy += formant(frequency, x);
 			}
 
 			// gl_FragColor = vec4(vec3(texture2D(waveform, vec2(frequency/N,0)).w), 1);

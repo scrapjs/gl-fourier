@@ -32,24 +32,41 @@ module.exports = function (N, data) {
 		const float pi2 = ${Math.PI*2};
 		const float pi = ${Math.PI};
 
-		vec2 phasor (float ratio, float f, float a) {
-			return a * vec2(
-				cos(pi2 * ratio * f),
-				sin(pi2 * ratio * f)
+		//phasor/source run state
+		float distance;
+		float step;
+
+		//accumulated resonance energy for a source
+		vec2 energy;
+
+		//base frequency of a phasor
+		float frequency;
+
+		//get energy state of a phasor
+		vec2 phasor () {
+			return vec2(
+				cos(pi2 * distance * frequency),
+				sin(pi2 * distance * frequency)
+			);
+		}
+
+		//get energy state of a source
+		vec2 source () {
+			return vec2(
+				texture2D(waveform, vec2(distance, 0)).w
 			);
 		}
 
 		void main () {
-			vec2 energy = vec2(0);
-			float ratio;
-			float x;
-			float frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
+			energy = vec2(0);
+			distance = 0.;
+			step = 1./N;
+			frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
 
 			// sum all input values masked by frequency values
 			for (float i = 0.; i < N; i++) {
-				ratio = i/N;
-				x = texture2D(waveform, vec2(ratio, 0)).w;
-				energy += phasor(ratio, frequency, x);
+				energy += dot(phasor(), source());
+				distance += step;
 			}
 
 			gl_FragColor = vec4(vec3(length(energy / N) * 255.), 1);
