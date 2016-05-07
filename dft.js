@@ -32,9 +32,15 @@ module.exports = function (N, data) {
 		const float pi2 = ${Math.PI*2};
 		const float pi = ${Math.PI};
 
+		vec2 phasor (float ratio, float f, float a) {
+			return a * vec2(
+				cos(pi2 * ratio * f),
+				sin(pi2 * ratio * f)
+			);
+		}
+
 		void main () {
-			float real = 0.;
-			float im = 0.;
+			vec2 energy = vec2(0);
 			float ratio;
 			float x;
 			float frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
@@ -43,12 +49,10 @@ module.exports = function (N, data) {
 			for (float i = 0.; i < N; i++) {
 				ratio = i/N;
 				x = texture2D(waveform, vec2(ratio, 0)).w;
-				real += cos( pi2 * ratio * frequency) * x;
-				im += sin( pi2 * ratio * frequency) * x;
+				energy += phasor(ratio, frequency, x);
 			}
 
-			// gl_FragColor = vec4(vec3(texture2D(waveform, vec2(frequency/N,0)).w), 1);
-			gl_FragColor = vec4(vec3(sqrt(real*real + im*im) / N) * 255., 1);
+			gl_FragColor = vec4(vec3(length(energy / N) * 255.), 1);
 		}
 		`,
 

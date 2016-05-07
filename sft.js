@@ -51,7 +51,7 @@ module.exports = function (N, data) {
 			}
 
 			// gl_FragColor = vec4(vec3(texture2D(waveform, vec2(frequency/N,0)).w), 1);
-			gl_FragColor = vec4(vec3(sqrt(real*real + im*im) / N) * 255., 1);
+			gl_FragColor = vec4(vec3(length(energy) / N) * 255., 1);
 		}
 		`,
 
