@@ -25,6 +25,14 @@ test('Fragment dft', function () {
 	}
 });
 
+
+var sft = require('./sft')(N, waveform);
+test.only('Stochastic FT', function () {
+	// for (var i = 0; i < max; i++) {
+		sft();
+	// }
+});
+
 test('Vertex dft');
 
 var fftnd = require('./fft-ndarray')(N, waveform);

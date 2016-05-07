@@ -13,6 +13,19 @@ module.exports = function (N, data) {
 		data: data
 	});
 
+	var noiseSize = 512;
+	var noise = [];
+	for (var i = 0; i < noiseSize*noiseSize; i++) {
+		noise.push(Math.random());
+	}
+	var noiseText = regl.texture({
+		width: noiseSize,
+		height: noiseSize,
+		format: 'alpha',
+		type: 'float',
+		data: noise
+	});
+
 	return regl({
 		vert: `
 		precision highp float;
@@ -24,36 +37,62 @@ module.exports = function (N, data) {
 
 		frag: `
 		precision highp float;
+
 		uniform sampler2D waveform;
+		uniform sampler2D noise;
 		uniform vec2 viewport;
+		uniform float seed;
 
 		const float N = ${N}.;
 		const float rate = 44100.;
 		const float pi2 = ${Math.PI*2};
 		const float pi = ${Math.PI};
 
-		// take frequency and quality params, return real/imagine values
-		vec2 formant (float f, float q, float a) {
-			return a * vec2(
-				pi2 * ratio
+		//phasor/source run state
+		float distance;
+		float step;
+
+		//accumulated resonance energy for a source
+		vec2 energy;
+
+		//formant behaviour
+		float frequency;
+		float range;
+
+		//get energy state of a phasor
+		vec2 phasor () {
+			return vec2(
+				cos(pi2 * distance * frequency),
+				sin(pi2 * distance * frequency)
 			);
 		}
 
+		//get energy state of a source
+		vec2 source () {
+			return vec2(
+				texture2D(waveform, vec2(distance, 0)).w
+			);
+		}
+
+		//get noise sample
+		float random () {
+			return texture2D(noise, vec2(distance, gl_FragCoord.y / viewport.y)).w;
+		}
+
 		void main () {
-			float energy = 0.;
-			float ratio;
-			float x;
-			float frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
+			energy = vec2(0);
+			distance = 0.;
+			step = 1./N;
+			frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
+			range = step * 0.5;
 
 			// sum all input values masked by frequency values
 			for (float i = 0.; i < N; i++) {
-				ratio = i/N;
-				x = texture2D(waveform, vec2(ratio, 0)).w;
-				energy += formant(frequency, x);
+				energy += dot(phasor(), source());
+				distance += (step + random() * range - range*0.5);
 			}
 
-			// gl_FragColor = vec4(vec3(texture2D(waveform, vec2(frequency/N,0)).w), 1);
-			gl_FragColor = vec4(vec3(length(energy) / N) * 255., 1);
+			gl_FragColor = vec4(vec3(length(energy / N) * 255.), 1);
 		}
 		`,
 
@@ -65,6 +104,7 @@ module.exports = function (N, data) {
 
 		uniforms: {
 			waveform: text,
+			noise: noiseText,
 			viewport: function (a,b,stats) {
 				return [stats.width,stats.height];
 			}
