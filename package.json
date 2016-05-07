@@ -1,0 +1,34 @@
+{
+  "name": "gl-fourier",
+  "version": "1.0.0",
+  "description": "Collection of fourier transforms implemented in webgl",
+  "main": "dft.js",
+  "scripts": {
+    "test": "budo test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dfcreative/gl-fourier.git"
+  },
+  "keywords": [
+    "fft",
+    "dft",
+    "fourier",
+    "webgl"
+  ],
+  "author": "ΔY <dfcreative@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dfcreative/gl-fourier/issues"
+  },
+  "homepage": "https://github.com/dfcreative/gl-fourier#readme",
+  "devDependencies": {
+    "fft": "^0.2.1",
+    "tst": "^1.3.1"
+  },
+  "dependencies": {
+    "ndarray": "^1.0.18",
+    "ndarray-fft": "^1.0.2",
+    "regl": "^0.3.0"
+  }
+}
