@@ -50,6 +50,7 @@ module.exports = function (N, data) {
 
 		//phasor/source run state
 		float distance;
+		float sourceDistance;
 		float step;
 
 		//accumulated resonance energy for a source
@@ -82,14 +83,16 @@ module.exports = function (N, data) {
 		void main () {
 			energy = vec2(0);
 			distance = 0.;
+			sourceDistance = 0.;
 			step = 1./N;
 			frequency = N * 0.5 * gl_FragCoord.x / viewport.x;
-			range = step * 0.5;
+			range = step*.1;
 
 			// sum all input values masked by frequency values
 			for (float i = 0.; i < N; i++) {
 				energy += dot(phasor(), source());
 				distance += (step + random() * range - range*0.5);
+				sourceDistance += step;
 			}
 
 			gl_FragColor = vec4(vec3(length(energy / N) * 255.), 1);
